@@ -47,6 +47,7 @@ BANNER
 
     local model_mappings=()
     local has_mappings=true
+    local idx=1
 
     for model in opus sonnet haiku; do
         local env_key val
@@ -54,11 +55,12 @@ BANNER
         val="$(json_get_field "$CLAUDE_SETTINGS" "env.$env_key" || true)"
         if [[ -n "$val" ]]; then
             model_mappings+=("$model:$val")
-            printf "  %-8s → %s\n" "$model" "$val"
+            printf "  ${_C_CYAN}%d)${_C_RESET} %-8s → %s\n" "$idx" "$model" "$val"
         else
-            printf "  %-8s → ${_C_DIM}(未设置)${_C_RESET}\n" "$model"
+            printf "  ${_C_CYAN}%d)${_C_RESET} %-8s → ${_C_DIM}(未设置)${_C_RESET}\n" "$idx" "$model"
             has_mappings=false
         fi
+        ((idx++))
     done
     echo ""
 
@@ -71,18 +73,20 @@ BANNER
 
     # ── Step 2: 选择高峰期模型 ──
     print_color "${_C_BOLD}━━━ Step 2: 高峰期模型 ━━━${_C_RESET}\n"
-    print_color "${_C_DIM}高峰期为白天工作时段，建议选择性价比高的模型${_C_RESET}\n"
+    print_color "${_C_DIM}高峰期为白天工作时段，建议选择性价比高的模型（请输入编号选择）${_C_RESET}\n"
     echo ""
     local peak_model
-    peak_model="$(ask_choice "选择高峰期使用的模型（白天工作时段）：" "sonnet" "opus" "haiku")"
+    ask_choice "选择高峰期使用的模型（白天工作时段）：" "sonnet" "opus" "haiku"
+    peak_model="$_ASK_RESULT"
     echo ""
 
     # ── Step 3: 选择非高峰期模型 ──
     print_color "${_C_BOLD}━━━ Step 3: 非高峰期模型 ━━━${_C_RESET}\n"
-    print_color "${_C_DIM}非高峰期为夜间/周末，可选择更强的模型以充分利用资源${_C_RESET}\n"
+    print_color "${_C_DIM}非高峰期为夜间/周末，可选择更强的模型以充分利用资源（请输入编号选择）${_C_RESET}\n"
     echo ""
     local offpeak_model
-    offpeak_model="$(ask_choice "选择非高峰期使用的模型（夜间/周末）：" "opus" "sonnet" "haiku")"
+    ask_choice "选择非高峰期使用的模型（夜间/周末）：" "opus" "sonnet" "haiku"
+    offpeak_model="$_ASK_RESULT"
     echo ""
 
     if [[ "$peak_model" == "$offpeak_model" ]]; then
@@ -94,17 +98,21 @@ BANNER
 
     # ── Step 4: 设置切换时间 ──
     print_color "${_C_BOLD}━━━ Step 4: 切换时间设置 ━━━${_C_RESET}\n"
-    print_color "${_C_DIM}请输入 24 小时制时间（HH:MM），直接回车可使用默认值${_C_RESET}\n"
+    print_color "${_C_DIM}请选择切换时间（请输入编号选择）${_C_RESET}\n"
     echo ""
     local peak_start offpeak_start
 
-    if [[ -f "$SCHEDULER_CONFIG" ]]; then
-        peak_start="$(json_get_field "$SCHEDULER_CONFIG" "peak_start" || true)"
-        offpeak_start="$(json_get_field "$SCHEDULER_CONFIG" "offpeak_start" || true)"
-    fi
+    # 生成 24 小时选项（00:00 ~ 23:00）
+    local hours=()
+    local h
+    for h in $(seq 0 23); do
+        hours+=("$(printf '%02d:00' "$h")")
+    done
 
-    peak_start="$(ask_time "高峰期开始时间（切换到 ${peak_model}）" "${peak_start:-09:00}")"
-    offpeak_start="$(ask_time "非高峰期开始时间（切换到 ${offpeak_model}）" "${offpeak_start:-18:00}")"
+    ask_choice "高峰期开始时间（切换到 ${peak_model}）：" "${hours[@]}"
+    peak_start="$_ASK_RESULT"
+    ask_choice "非高峰期开始时间（切换到 ${offpeak_model}）：" "${hours[@]}"
+    offpeak_start="$_ASK_RESULT"
     echo ""
 
     # ── Step 5: 确认配置 ──

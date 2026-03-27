@@ -162,25 +162,44 @@ else
     fi
 fi
 # ask_choice <prompt> <option1> [option2] ...
-# 返回用户选择的选项（非编号），1-based
+# 结果通过全局变量 _ASK_RESULT 返回，避免 $(...) 子 shell 问题
+# 选项超过 8 个时自动切换为多列布局
 ask_choice() {
     local prompt="$1"; shift
     local options=("$@")
     local num=${#options[@]}
     local choice
 
+    _ASK_RESULT=""
     while true; do
         print_color "${_C_BOLD}${prompt}${_C_RESET}\n"
         local i=1
-        for opt in "${options[@]}"; do
-            printf "  ${_C_CYAN}%d)${_C_RESET} %s\n" "$i" "$opt"
-            ((i++))
-        done
+        if (( num > 8 )); then
+            # 多列布局：4 列
+            local cols=4
+            local rows=$(( (num + cols - 1) / cols ))
+            local row col idx
+            for (( row = 0; row < rows; row++ )); do
+                for (( col = 0; col < cols; col++ )); do
+                    idx=$(( row + col * rows ))
+                    if (( idx < num )); then
+                        printf "  ${_C_CYAN}%2d)${_C_RESET} %-6s" "$((idx+1))" "${options[idx]}"
+                    fi
+                done
+                printf "\n"
+            done
+        else
+            # 单列布局
+            for opt in "${options[@]}"; do
+                printf "  ${_C_CYAN}%d)${_C_RESET} %s\n" "$i" "$opt"
+                ((i++))
+            done
+        fi
         printf "  ${_C_DIM}(输入编号或名称)${_C_RESET}: "
         read -r choice < "$_INPUT_FD"
         # 支持数字输入
         if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= num)); then
-            echo "${options[$((choice-1))]}"
+            _ASK_RESULT="${options[$((choice-1))]}"
             return 0
         fi
         # 支持直接输入选项名称（不区分大小写）
@@ -190,11 +209,11 @@ ask_choice() {
             local lower_opt
             lower_opt="$(echo "$opt" | tr '[:upper:]' '[:lower:]')"
             if [[ "$lower_choice" == "$lower_opt" ]]; then
-                echo "$opt"
+                _ASK_RESULT="$opt"
                 return 0
             fi
         done
-        log_warn "无效选择，请输入编号（1-$num）或选项名称"
+        log_warn "无效选择，请输入编号（1-${num:-?}）或选项名称"
     done
 }
 

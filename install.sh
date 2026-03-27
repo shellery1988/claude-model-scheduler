@@ -120,16 +120,9 @@ main() {
 
     info "安装完成！"
     printf "\n"
-    printf "  ${_C_BOLD}使用方式：${_C_RESET}\n"
-    printf "    ${_C_CYAN}claude-model-scheduler install${_C_RESET}    # 启动配置向导\n"
-    printf "    ${_C_CYAN}claude-model-scheduler switch sonnet${_C_RESET}  # 手动切换\n"
-    printf "    ${_C_CYAN}claude-model-scheduler status${_C_RESET}       # 查看状态\n"
-    printf "\n"
 
-    # 如果 PATH 已生效，直接启动向导
-    if echo ":${PATH}:" | grep -q ":${BIN_DIR}:"; then
-        exec claude-model-scheduler install
-    fi
+    # 直接用绝对路径启动向导，并从终端读取输入
+    exec "${INSTALL_DIR}/claude-model-scheduler.sh" install < /dev/tty
 }
 
 main "$@"

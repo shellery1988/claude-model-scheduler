@@ -3,7 +3,7 @@
 # 用法: curl -fsSL https://raw.githubusercontent.com/yourname/claude-model-scheduler/main/install.sh | bash
 set -euo pipefail
 
-REPO="yourname/claude-model-scheduler"
+REPO="shellery1988/claude-model-scheduler"
 BRANCH="main"
 INSTALL_DIR="${HOME}/.claude/claude-model-scheduler"
 BIN_DIR="${HOME}/.local/bin"

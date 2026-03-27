@@ -176,13 +176,25 @@ ask_choice() {
             printf "  ${_C_CYAN}%d)${_C_RESET} %s\n" "$i" "$opt"
             ((i++))
         done
-        printf "  ${_C_DIM}(1-%d)${_C_RESET}: " "$num"
+        printf "  ${_C_DIM}(输入编号或名称)${_C_RESET}: "
         read -r choice < "$_INPUT_FD"
+        # 支持数字输入
         if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= num)); then
             echo "${options[$((choice-1))]}"
             return 0
         fi
-        log_warn "无效选择，请输入 1-$num"
+        # 支持直接输入选项名称（不区分大小写）
+        local lower_choice
+        lower_choice="$(echo "$choice" | tr '[:upper:]' '[:lower:]')"
+        for opt in "${options[@]}"; do
+            local lower_opt
+            lower_opt="$(echo "$opt" | tr '[:upper:]' '[:lower:]')"
+            if [[ "$lower_choice" == "$lower_opt" ]]; then
+                echo "$opt"
+                return 0
+            fi
+        done
+        log_warn "无效选择，请输入编号（1-$num）或选项名称"
     done
 }
 

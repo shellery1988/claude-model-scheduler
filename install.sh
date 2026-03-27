@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # install.sh — 一键远程安装脚本
-# 用法: curl -fsSL https://raw.githubusercontent.com/yourname/claude-model-scheduler/main/install.sh | bash
+# 用法: curl -fsSL https://raw.githubusercontent.com/shellery1988/claude-model-scheduler/main/install.sh | bash
 set -euo pipefail
 
 REPO="shellery1988/claude-model-scheduler"

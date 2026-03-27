@@ -71,12 +71,16 @@ BANNER
 
     # ── Step 2: 选择高峰期模型 ──
     print_color "${_C_BOLD}━━━ Step 2: 高峰期模型 ━━━${_C_RESET}\n"
+    print_color "${_C_DIM}高峰期为白天工作时段，建议选择性价比高的模型${_C_RESET}\n"
+    echo ""
     local peak_model
     peak_model="$(ask_choice "选择高峰期使用的模型（白天工作时段）：" "sonnet" "opus" "haiku")"
     echo ""
 
     # ── Step 3: 选择非高峰期模型 ──
     print_color "${_C_BOLD}━━━ Step 3: 非高峰期模型 ━━━${_C_RESET}\n"
+    print_color "${_C_DIM}非高峰期为夜间/周末，可选择更强的模型以充分利用资源${_C_RESET}\n"
+    echo ""
     local offpeak_model
     offpeak_model="$(ask_choice "选择非高峰期使用的模型（夜间/周末）：" "opus" "sonnet" "haiku")"
     echo ""

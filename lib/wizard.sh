@@ -90,6 +90,8 @@ BANNER
 
     # ── Step 4: 设置切换时间 ──
     print_color "${_C_BOLD}━━━ Step 4: 切换时间设置 ━━━${_C_RESET}\n"
+    print_color "${_C_DIM}请输入 24 小时制时间（HH:MM），直接回车可使用默认值${_C_RESET}\n"
+    echo ""
     local peak_start offpeak_start
 
     if [[ -f "$SCHEDULER_CONFIG" ]]; then

@@ -152,8 +152,10 @@ with open('$tmpfile', 'w') as f:
 
 # ── 用户输入辅助 ──────────────────────────────────────────
 # 当 stdin 被管道占用时（如 curl | bash），从 /dev/tty 读取终端输入
-_INPUT_FD="/dev/tty"
-if [[ ! -t 0 ]]; then
+if [[ -t 0 ]]; then
+    _INPUT_FD="/dev/stdin"
+else
+    _INPUT_FD="/dev/tty"
     if [[ ! -e /dev/tty ]]; then
         log_error "无法访问终端，请在交互式终端中运行"
         exit 1

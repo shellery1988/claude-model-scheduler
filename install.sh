@@ -35,8 +35,8 @@ detect_downloader() {
 download() {
     local url="$1" dest="$2"
     case "$DOWNLOADER" in
-        curl) curl -fsSL "$url" -o "$dest" ;;
-        wget) wget -qO "$dest" "$url" ;;
+        curl) curl -fsSL --connect-timeout 10 --max-time 120 "$url" -o "$dest" ;;
+        wget) wget -qO "$dest" --timeout=120 --connect-timeout=10 "$url" ;;
     esac
 }
 

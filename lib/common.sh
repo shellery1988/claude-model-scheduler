@@ -151,6 +151,14 @@ with open('$tmpfile', 'w') as f:
 }
 
 # ── 用户输入辅助 ──────────────────────────────────────────
+# 当 stdin 被管道占用时（如 curl | bash），从 /dev/tty 读取终端输入
+_INPUT_FD="/dev/tty"
+if [[ ! -t 0 ]]; then
+    if [[ ! -e /dev/tty ]]; then
+        log_error "无法访问终端，请在交互式终端中运行"
+        exit 1
+    fi
+fi
 # ask_choice <prompt> <option1> [option2] ...
 # 返回用户选择的选项（非编号），1-based
 ask_choice() {
@@ -167,7 +175,7 @@ ask_choice() {
             ((i++))
         done
         printf "  ${_C_DIM}(1-%d)${_C_RESET}: " "$num"
-        read -r choice
+        read -r choice < "$_INPUT_FD"
         if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= num)); then
             echo "${options[$((choice-1))]}"
             return 0
@@ -191,7 +199,7 @@ ask_confirm() {
 
     local answer
     printf "%s %s: " "$prompt" "$yn_str"
-    read -r answer
+    read -r answer < "$_INPUT_FD"
     answer="${answer:-$default}"
 
     case "$answer" in
@@ -213,7 +221,7 @@ ask_time() {
         else
             printf "%s: " "$prompt"
         fi
-        read -r time_input
+        read -r time_input < "$_INPUT_FD"
         time_input="${time_input:-$default}"
 
         # 校验 HH:MM 格式
